@@ -87,11 +87,16 @@ def validate_options(options: Options) -> None:
 
 def read_reports(options: Options) -> CoverageContainer:
     """Read the reports from the given locations."""
-    if options.json_add_tracefile or options.cobertura_add_tracefile:
+    if options.json_add_tracefile or options.cobertura_add_tracefile or options.lcov_add_tracefile:
         covdata = JsonHandler(options).read_report()
         covdata = merge_covdata(
             covdata,
             CoberturaHandler(options).read_report(),
+            get_merge_mode_from_options(options),
+        )
+        covdata = merge_covdata(
+            covdata,
+            LcovHandler(options).read_report(),
             get_merge_mode_from_options(options),
         )
     else:

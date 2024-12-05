@@ -30,6 +30,9 @@ class LcovHandler(BaseHandler):
     @classmethod
     def get_options(cls) -> list[Union[GcovrConfigOption, str]]:
         return [
+            # Global options used for merging.
+            "merge_mode_functions",
+            "merge_mode_conditions",
             GcovrConfigOption(
                 "lcov",
                 ["--lcov"],
@@ -66,7 +69,24 @@ class LcovHandler(BaseHandler):
                 help="The name used for TN in LCOV file. Default is '{default!s}'.",
                 default="GCOVR report",
             ),
+            GcovrConfigOption(
+                "lcov_add_tracefile",
+                ["--lcov-add-tracefile"],
+                config="lcov-add-tracefile",
+                help=(
+                    "Combine the coverage data from LCOV files. "
+                    "When this option is used gcov is not run to collect "
+                    "the new coverage data."
+                ),
+                action="append",
+                default=[],
+            ),
         ]
+
+    def read_report(self) -> CoverageContainer:
+        from .read import read_report  # pylint: disable=import-outside-toplevel # Lazy loading is intended here
+
+        return read_report(self.options)
 
     def write_report(self, covdata: CoverageContainer, output_file: str) -> None:
         from .write import write_report  # pylint: disable=import-outside-toplevel # Lazy loading is intended here
